@@ -1,0 +1,240 @@
+---
+title: "project 5"
+output: html_project5
+---
+```{r}
+library(tidyverse)
+```
+
+```{r}
+library(dplyr)
+```
+
+
+
+```{r}
+df <- read.csv("C:\\Users\\mikol\\Downloads\\athlete_events.csv")
+df <- distinct(df)
+head(df)
+```
+
+```{r}
+df <- df %>% distinct()
+dim(df)
+```
+
+```{r}
+df <- df %>% distinct()
+season_counts <- df %>%
+  group_by(Season) %>% 
+  summarize(count = n())
+
+print(season_counts)
+
+ggplot(season_counts, aes(x = Season, y = count, fill = Season)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Number of Entries in Summer and Winter Olympics",
+       x = "Olympics Season",
+       y = "Number of Entries") +
+  theme_minimal()
+```
+
+
+
+
+
+
+```{r}
+df <- df %>% distinct()
+unique_athletes <- df %>%
+  group_by(Season) %>%
+  summarise(unique_count = n_distinct(Name))
+
+print(unique_athletes)
+
+ggplot(unique_athletes, aes(x = Season, y = unique_count, fill = Season)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Number of Unique Athletes in Summer and Winter Olympics",
+       x = "Olympics Season",
+       y = "Number of Unique Athletes") +
+  theme_minimal()
+```
+
+
+
+```{r}
+df <- df %>% distinct()
+unique_athletes_winter <- df %>%
+  filter(Season == "Winter") %>%
+  group_by(NOC) %>%
+  summarise(unique_count = n_distinct(Name))
+
+usa_unique_athletes <- unique_athletes_winter %>%
+  filter(NOC == "USA") %>%
+  pull(unique_count)
+
+print(paste("Number of unique athletes from USA in Winter Olympics:", usa_unique_athletes))
+
+top_10_countries <- unique_athletes_winter %>%
+  arrange(desc(unique_count)) %>%
+  slice(1:10)
+
+ggplot(top_10_countries, aes(x = reorder(NOC, -unique_count), y = unique_count, fill = NOC)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Top 10 Countries by Number of Unique Athletes in Winter Olympics",
+       x = "Country (NOC)",
+       y = "Number of Unique Athletes") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+
+
+
+```{r}
+df <- df %>% distinct()
+
+sweden_us_athletes <- df %>%
+  filter(NOC %in% c("SWE", "USA")) %>%
+  distinct(Name, Year, Season, .keep_all = TRUE)
+
+
+average_weights <- sweden_us_athletes %>%
+  group_by(NOC) %>%
+  summarise(avg_weight = mean(Weight, na.rm = TRUE))
+
+print(average_weights)
+
+ggplot(sweden_us_athletes %>% filter(NOC == "SWE"), aes(x = Weight)) +
+  geom_histogram(binwidth = 5, fill = "skyblue", color = "black") +
+  labs(title = "Histogram of Weights of Swedish Athletes (NOC = SWE)",
+       x = "Weight (kg)",
+       y = "Frequency") +
+  theme_minimal()
+
+ggplot(sweden_us_athletes %>% filter(NOC == "USA"), aes(x = Weight)) +
+  geom_histogram(binwidth = 5, fill = "lightgreen", color = "black") +
+  labs(title = "Histogram of Weights of American Athletes (NOC = USA)",
+       x = "Weight (kg)",
+       y = "Frequency") +
+  theme_minimal()
+```
+
+
+
+```{r}
+df <- df %>% distinct()
+usa_sports <- df %>%
+  filter(NOC == "USA" & Sport %in% c("Basketball", "Tennis", "Wrestling"))
+
+average_median_heights <- usa_sports %>%
+  group_by(Sport) %>%
+  summarise(mean_height = mean(Height, na.rm = TRUE),
+            median_height = median(Height, na.rm = TRUE))
+
+print(average_median_heights)
+
+ggplot(usa_sports, aes(x = Sport, y = Height, fill = Sport)) +
+  geom_boxplot() +
+  labs(title = "Heights of USA Athletes by Sport (Basketball, Tennis, Wrestling)",
+       x = "Sport",
+       y = "Height (cm)") +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+
+```
+
+
+
+
+```{r}
+df <- df %>% distinct()
+
+usa_volleyball <- df %>%
+  filter(NOC == "USA" & Sport == "Volleyball")
+
+usa_volleyball <- usa_volleyball %>%
+  mutate(Year = factor(Year))
+
+ggplot(usa_volleyball, aes(x = Year, y = Height)) +
+  geom_boxplot(fill = "skyblue", color = "black") +
+  labs(title = "Heights of US Volleyball Players Over the Years",
+       x = "Year",
+       y = "Height (cm)") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+
+
+```{r}
+df <- df %>% distinct()
+
+
+usa_summer <- df %>%
+  filter(NOC == "USA" & Season == "Summer")
+
+
+unique_athletes_year <- usa_summer %>%
+  group_by(Year) %>%
+  summarise(unique_count = n_distinct(Name))
+
+
+ggplot(unique_athletes_year, aes(x = Year, y = unique_count)) +
+  geom_line(color = "blue", size = 1) +
+  geom_point(color = "red") +
+  labs(title = "Number of Unique USA Athletes in Summer Olympics Over the Years",
+       x = "Year",
+       y = "Number of Unique Athletes") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+
+
+
+```{r}
+df <- df %>% distinct()
+
+gold_medals <- df %>%
+  filter(Season == "Summer" & Medal == "Gold" & NOC %in% c("NED", "USA"))
+
+
+gold_medals_year <- gold_medals %>%
+  group_by(Year, NOC) %>%
+  summarise(gold_count = n())
+
+ggplot(gold_medals_year, aes(x = Year, y = gold_count, color = NOC)) +
+  geom_line(size = 1) +
+  geom_point(size = 2) +
+  labs(title = "Number of Gold Medals Earned by Netherlands and USA in Summer Olympics Over the Years",
+       x = "Year",
+       y = "Number of Gold Medals") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_color_manual(values = c("USA" = "blue", "NED" = "orange"))
+```
+
+
+
+
+```{r}
+df <- df %>% distinct()
+
+usa_gold_medals <- df %>%
+  filter(Season == "Summer" & Medal == "Gold" & NOC == "USA")
+
+usa_gold_medals_by_sport <- usa_gold_medals %>%
+  group_by(Sport) %>%
+  summarise(gold_count = n()) %>%
+  arrange(gold_count)
+
+ggplot(usa_gold_medals_by_sport, aes(x = gold_count, y = reorder(Sport, gold_count))) +
+  geom_bar(stat = "identity", fill = "skyblue", color = "black") +
+  labs(title = "Number of Gold Medals Won by USA in Summer Olympics by Sport",
+       x = "Number of Gold Medals",
+       y = "Sport") +
+  theme_minimal()
+```
+
